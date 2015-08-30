@@ -42,13 +42,18 @@ public class ServiceStatisticsRetriever {
 	private SimpleDateFormat dateF=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private ArrayList<Ref> refToReset=null;
      /**
-       * Retrieve statistics for all business services being monitored in the
+       * Retrieve statistics for all business or proxy services being monitored in the
       * domain and reset statistics for the same.
       * @throws Exception
       */
 
-	void getAndResetStatsForAllMonitoredBizServices(boolean reset) throws Exception {
-		Ref[] serviceRefs =serviceDomainMbean.getMonitoredBusinessServiceRefs();
+	void getAndResetStatsForAllMonitoredServices(boolean reset, boolean isBusiness) throws Exception {
+		Ref[] serviceRefs = null;
+		if(isBusiness){
+			serviceRefs = serviceDomainMbean.getMonitoredBusinessServiceRefs();
+		}else{
+			serviceRefs = serviceDomainMbean.getMonitoredProxyServiceRefs();
+		}
 		refToReset=new ArrayList<Ref>();		
 		// Create a bitwise map for desired resource types.
 		int typeFlag = 0;
@@ -60,7 +65,11 @@ public class ServiceStatisticsRetriever {
 		// Get cluster-level statistics.
 		try {
 			// Get statistics.
-			System.out.println("Now trying to get statistics for -" +serviceRefs.length + " business services...");
+			if(isBusiness){
+				System.out.println("Now trying to get statistics for -" +serviceRefs.length + " business services...");
+			}else{
+					System.out.println("Now trying to get statistics for -" +serviceRefs.length + " Proxy services...");
+			}
 			for(Ref aux :serviceRefs){
 				try{
 					Ref serviceRefsAux[]=new Ref[1];
@@ -101,125 +110,7 @@ public class ServiceStatisticsRetriever {
 			System.out.println("ERROR: MORIiiii111111. "+e);
 		}
 	}
-		
-    /**
-     * Retrieve statistics for all proxy services being monitored in the
-    * domain and reset statistics for the same.
-    * @throws Exception
-    */
 
-	void getAndResetStatsForAllMonitoreProxServices(boolean reset) throws Exception {
-		Ref[] serviceRefs =serviceDomainMbean.getMonitoredProxyServiceRefs();
-		refToReset=new ArrayList<Ref>();		
-		// Create a bitwise map for desired resource types.
-		int typeFlag = 0;
-		typeFlag = typeFlag | ResourceType.SERVICE.value();
-		typeFlag = typeFlag | ResourceType.WEBSERVICE_OPERATION.value();
-		typeFlag = typeFlag | ResourceType.URI.value();
-		
-		HashMap<Ref, ServiceResourceStatistic> resourcesMap = null;
-		// Get cluster-level statistics.
-		try {
-			// Get statistics.
-			System.out.println("Now trying to get statistics for -" +serviceRefs.length + " Proxy services...");
-			for(Ref aux :serviceRefs){
-				try{
-					Ref serviceRefsAux[]=new Ref[1];
-					serviceRefsAux[0]=aux;
-					resourcesMap = serviceDomainMbean.getBusinessServiceStatistics(serviceRefsAux, typeFlag, serverName);
-					// Save retrieved statistics.
-					saveStatistics(resourcesMap, 0,aux.getLocalName(),aux.getFullName());
-					if(reset){
-						refToReset.add(aux);
-					}
-				}catch (DomainMonitoringDisabledException dmde) {
-					/** Statistics not available as monitoring is turned off at
-	                 domain level.
-					 */
-					System.out.println("==================================\n");
-					System.out.println("Statistics not available as monitoring is turned off at domain level.");
-					System.out.println("==============================\n");
-				}catch (MonitoringException me) {
-					// Internal problem... May be aggregation server is crashed...
-					System.out.println("================================\n");
-					System.out.println("ERROR: Statistics is not available... Check if aggregation server is crashed...");
-					System.out.println("=================================\n");
-				}catch(Exception e){
-					System.out.println("MORI! "+aux.getLocalName()+" "+e);
-				}
-			}
-			if(reset){
-				serviceDomainMbean.resetStatistics(serviceRefs);
-				System.out.println("Reset succesfull");
-			}
-		}catch (IllegalArgumentException iae) {
-			System.out.println("===============================\n");
-			System.out.println("Encountered IllegalArgumentException...Details:");
-			System.out.println(iae.getMessage());
-			System.out.println("Check if proxy ref was passed OR flowComp resource was passed OR bitmap is invalid...\nIf so correct it and try again!!!");
-			System.out.println("==================================\n");
-		}catch (Exception e){
-			System.out.println("ERROR: MORIiiii111111. "+e);
-		}
-	}
-	
-/*    void getAndResetStatsForAllMonitoredProxyServices() throws Exception {
-        Ref[] serviceRefs = serviceDomainMbean.getMonitoredProxyServiceRefs();
-        // Create a bitwise map for desired resource types.
-        int typeFlag = 0;
-        typeFlag = typeFlag | ResourceType.SERVICE.value();
-        typeFlag = typeFlag | ResourceType.FLOW_COMPONENT.value();
-        typeFlag = typeFlag | ResourceType.WEBSERVICE_OPERATION.value();
-
-        HashMap<Ref, ServiceResourceStatistic> resourcesMap = null;
-        
-        // Get cluster-level statistics.
-        try {
-             // Get statistics.
-             System.out.println("Now trying to get statistics for -" + serviceRefs.length + " proxy services...");
-             resourcesMap = serviceDomainMbean.getProxyServiceStatistics(serviceRefs,typeFlag, null);
-
-             // Reset statistics.
-             long resetRequestTime = serviceDomainMbean.resetStatistics(serviceRefs);
-
-             // Save retrieved statistics.
-             String fileName = "ProxyStatistics_" + new SimpleDateFormat("yyyy_MM_dd_HH_mm").format(new Date(System.currentTimeMillis())) +".txt";
-             saveStatisticsToFile(resourcesMap, resetRequestTime,fileName);
-        }
-        catch (IllegalArgumentException iae) {
-            System.out.println("===================================\n");
-            System.out.println("Encountered IllegalArgumentException... Details:");
-            System.out.println(iae.getMessage());
-            System.out.println("Check if business ref was passed OR bitmap is " + "invalid...\nIf so correct it and try again!!!");
-            System.out.println("===================================\n");
-            throw iae;
-        }
-
-
-        catch (DomainMonitoringDisabledException dmde) {
-             /** Statistics not available as monitoring is turned off at the
-            * domain level.
-            *//*
-             System.out.println("===================================\n");
-            System.out.println("Statistics not available as monitoring " + "is turned off at domain level.");
-             System.out.println("===================================\n");
-            throw dmde;
-        }
-        catch (MonitoringException me) {
-             // Internal problem ... May be aggregation server is crashed ...
-             System.out.println("===================================\n");
-              System.out.println("ERROR: Statistics is not available... " +
-                  "Check if aggregation server is crashed...");
-             System.out.println("===================================\n");
-            throw me;
-        }
-   }
-	*/
-	
-	
-	
-	
-	
      /**
       * Saves statistics of all services from the specified map.
       * @param statsMap Map containing statistics for one or more services
@@ -549,10 +440,10 @@ public class ServiceStatisticsRetriever {
 			System.out.println("\n**********************************");
 			System.out.println("Retrieving statistics for all monitored business services.");
 			try {
-				collector.getAndResetStatsForAllMonitoredBizServices(isToReset);
+				collector.getAndResetStatsForAllMonitoredServices(isToReset,true);
 				System.out.println("\n**********************************");
 				System.out.println("Retrieving statistics for all monitored proxy services.");
-				collector.getAndResetStatsForAllMonitoreProxServices(isToReset);
+				collector.getAndResetStatsForAllMonitoredServices(isToReset,false);
 				System.out.println("Successfully retrieved and reset statistics for all monitored \n business services at " + 
 				new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date(System.currentTimeMillis())));
 			} catch (Exception e) {
