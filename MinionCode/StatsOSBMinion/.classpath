@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="C:/Users/alphatech/Dropbox/AlphaTech/Minion/JarsProd/alsb.jar"/>
+	<classpathentry kind="lib" path="C:/Users/alphatech/Dropbox/AlphaTech/Minion/JarsProd/com.bea.common.configfwk_1.6.0.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/alphatech/Dropbox/AlphaTech/Minion/JarsProd/com.bea.core.management.core_2.9.0.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/alphatech/Dropbox/AlphaTech/Minion/JarsProd/com.bea.core.management.jmx_1.4.2.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/alphatech/Dropbox/AlphaTech/Minion/JarsProd/ojdbc6.jar"/>
+	<classpathentry kind="lib" path="C:/Users/alphatech/Dropbox/AlphaTech/Minion/JarsProd/osb-server-modules-ref.jar"/>
+	<classpathentry kind="lib" path="C:/Users/alphatech/Dropbox/AlphaTech/Minion/JarsProd/sb-kernel-api.jar"/>
+	<classpathentry kind="lib" path="C:/Users/alphatech/Dropbox/AlphaTech/Minion/JarsProd/sb-kernel-impl.jar"/>
+	<classpathentry kind="lib" path="C:/Users/alphatech/Dropbox/AlphaTech/Minion/JarsProd/wlfullclient.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
